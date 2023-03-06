@@ -2,9 +2,44 @@
 
 <PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="container">
+    <div class="row">
+        @foreach (var emoji in animalEmoji)
+        {
+            <div class="col-3">
+                <button type="button" class="btn btn-outline-dark">
+                    <h1>@emoji</h1>
+                </button>
 
-Welcome to your new app.
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+            </div>
+        }
+    </div>
+</div>
 
+<style>
+    .container {
+        width:400px;
+    }
+
+    button {
+        width:100px;
+        height:100px;
+        font-size:50px;
+    }
+</style>
+
+@code {
+     List<string> animalEmoji = new List<string>()
+            {
+                "🐶","🐶",
+                "🐴","🐴",
+                "🦊","🦊",
+                "🐮","🐮",
+                "🐱","🐱",
+                "🦁","🦁",
+                "🐯","🐯",
+                "🐭","🐭"
+
+            };
+}
