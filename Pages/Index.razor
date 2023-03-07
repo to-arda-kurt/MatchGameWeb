@@ -1,13 +1,15 @@
 ﻿@page "/"
 
+@using System.Timers; 
+
 <PageTitle>Index</PageTitle>
 
 <div class="container">
     <div class="row">
-        @for(var emojiNumber = 0; emojiNumber<shuffledEmojis.Count; emojiNumber++ )
+        @for (var emojiNumber = 0; emojiNumber < shuffledEmojis.Count; emojiNumber++)
         {
-                var emoji = shuffledEmojis[emojiNumber];
-                var description = $"Button {emojiNumber}";
+            var emoji = shuffledEmojis[emojiNumber];
+            var description = $"Button {emojiNumber}";
 
             <div class="col-3">
                 <button @onclick="@(()=>ButtonClick(emoji, description))" type="button" class="btn btn-outline-dark">
@@ -21,6 +23,10 @@
 
     <div class="row">
         <h2>Matches found: @matchesFound</h2>
+    </div>
+
+    <div class="row">
+        <h2>Matches found: @timeDisplay</h2>
     </div>
 </div>
 
@@ -38,7 +44,7 @@
 
 @code {
 
-            List<string> animalEmojis = new List<string>()
+    List<string> animalEmojis = new List<string>()
             {
                 "🐶","🐶",
                 "🐴","🐴",
@@ -51,51 +57,75 @@
 
             };
 
-            List<string> shuffledEmojis = new List<string>();
-            string lastEmojiFound = string.Empty;
-            string lastDescription = string.Empty;
-            int matchesFound = 0;
+    List<string> shuffledEmojis = new List<string>();
+    string lastEmojiFound = string.Empty;
+    string lastDescription = string.Empty;
+    int matchesFound = 0;
+    Timer timer;
+    int tenthOfSecondsElapsed = 0;
+    string timeDisplay;
 
     protected override void OnInitialized()
-        {
-            SetUpGame();
-        }
+    {
+        timer = new Timer(100);
+        timer.Elapsed += Timer_Tick;
+        SetUpGame();
+    }
 
 
-        private void SetUpGame()
-        {
-            Random random = new Random();
-            shuffledEmojis = animalEmojis
-                .OrderBy(emoji => random.Next())
-                .ToList();
+    private void SetUpGame()
+    {
+        Random random = new Random();
+        shuffledEmojis = animalEmojis
+            .OrderBy(emoji => random.Next())
+            .ToList();
         matchesFound = 0;
+        tenthOfSecondsElapsed = 0;
 
-        }
 
-        private void ButtonClick(string emoji, string animalDescription)
+    }
+
+
+
+    private void ButtonClick(string emoji, string animalDescription)
+    {
+        if (lastEmojiFound == string.Empty)
         {
-            if (lastEmojiFound == string.Empty)
+            lastEmojiFound = emoji;
+            lastDescription = animalDescription;
+            timer.Start();
+        }
+        else if ((lastEmojiFound == emoji) && (animalDescription != lastDescription))
+        {
+            shuffledEmojis = shuffledEmojis
+                            .Select(em => em.Replace(emoji, string.Empty))
+                            .ToList();
+            matchesFound++;
+            if (matchesFound == 8)
             {
-                lastEmojiFound = emoji;
-                lastDescription = animalDescription;
-            }
-            else if ((lastEmojiFound == emoji) && (animalDescription != lastDescription))
-            {
-                shuffledEmojis = shuffledEmojis
-                                .Select(em => em.Replace(emoji, string.Empty))
-                                .ToList();
-                matchesFound++;
-                if (matchesFound == 8)
-            {
+                timer.Stop();
+                timeDisplay += " - Play Again";
                 SetUpGame();
             }
-            }
-            else
-
-            {
-                lastEmojiFound = string.Empty;
-            }
         }
+        else
+
+        {
+            lastEmojiFound = string.Empty;
+        }
+    }
+
+    private void Timer_Tick(Object source, ElapsedEventArgs e)
+    {
+        InvokeAsync(() =>
+        {
+            tenthOfSecondsElapsed++;
+            timeDisplay = (tenthOfSecondsElapsed / 10F)
+                            .ToString("0.0s");
+        });
+    }
+
+
 
 
     }
