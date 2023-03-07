@@ -4,16 +4,23 @@
 
 <div class="container">
     <div class="row">
-        @foreach (var emoji in animalEmoji)
+        @for(var emojiNumber = 0; emojiNumber<shuffledEmojis.Count; emojiNumber++ )
         {
+                var emoji = shuffledEmojis[emojiNumber];
+                var description = $"Button {emojiNumber}";
+
             <div class="col-3">
-                <button type="button" class="btn btn-outline-dark">
+                <button @onclick="@(()=>ButtonClick(emoji, description))" type="button" class="btn btn-outline-dark">
                     <h1>@emoji</h1>
                 </button>
-
-
             </div>
+
+
         }
+    </div>
+
+    <div class="row">
+        <h2>Matches found: @matchesFound</h2>
     </div>
 </div>
 
@@ -30,7 +37,8 @@
 </style>
 
 @code {
-     List<string> animalEmoji = new List<string>()
+
+            List<string> animalEmojis = new List<string>()
             {
                 "🐶","🐶",
                 "🐴","🐴",
@@ -42,4 +50,52 @@
                 "🐭","🐭"
 
             };
-}
+
+            List<string> shuffledEmojis = new List<string>();
+            string lastEmojiFound = string.Empty;
+            string lastDescription = string.Empty;
+            int matchesFound = 0;
+
+    protected override void OnInitialized()
+        {
+            SetUpGame();
+        }
+
+
+        private void SetUpGame()
+        {
+            Random random = new Random();
+            shuffledEmojis = animalEmojis
+                .OrderBy(emoji => random.Next())
+                .ToList();
+        matchesFound = 0;
+
+        }
+
+        private void ButtonClick(string emoji, string animalDescription)
+        {
+            if (lastEmojiFound == string.Empty)
+            {
+                lastEmojiFound = emoji;
+                lastDescription = animalDescription;
+            }
+            else if ((lastEmojiFound == emoji) && (animalDescription != lastDescription))
+            {
+                shuffledEmojis = shuffledEmojis
+                                .Select(em => em.Replace(emoji, string.Empty))
+                                .ToList();
+                matchesFound++;
+                if (matchesFound == 8)
+            {
+                SetUpGame();
+            }
+            }
+            else
+
+            {
+                lastEmojiFound = string.Empty;
+            }
+        }
+
+
+    }
